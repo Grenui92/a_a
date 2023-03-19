@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "a-a"
+version = "0.1.0"
+description = ""
+authors = ["Grenui92 <grenui92@gmail.com>"]
+readme = "README.md"
+packages = [{include = "a_a"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+fastapi = "^0.94.0"
+uvicorn = "^0.21.0"
+fastapi-jwt-auth = "^0.5.0"
+sqlalchemy = "^2.0.6"
+passlib = "^1.7.4"
+python-multipart = "^0.0.6"
+psycopg2-binary = "^2.9.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
