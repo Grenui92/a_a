@@ -11,7 +11,7 @@ router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
 
 
-@router.post('/signup', response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/signup', response_model=dict, status_code=status.HTTP_201_CREATED)
 async def signup(body: ContactBase, db: Session = Depends(get_db)):
     exist_user = await contact_func.get_user_by_email(body.email, db)
     if exist_user:

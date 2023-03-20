@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from datetime import date, timedelta
 
 from db import get_db, Contact
@@ -47,19 +48,12 @@ async def search_by_name(name: str = 'Stas',
     return contact
 
 
-@app.get('/contact/search_by_surname/{surname}', response_model=ContactResponse)
-async def search_by_surname(surname: str = 'Vasilenko',
-                            db: Session = Depends(get_db)):
-    contact = db.query(Contact).filter(Contact.surname == surname).first()
-    if contact is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not Found')
-    return contact
+@app.get('/contact/search/{info}', response_model=ContactResponse)
+async def search(data: str, db: Session = Depends(get_db)):
+    contact = db.query(Contact).filter(or_(Contact.name == data,
+                                           Contact.surname == data,
+                                           Contact.email == data)).first()
 
-
-@app.get('/contact/search_by_email/{email}', response_model=ContactResponse)
-async def search_by_email(email: str = 'grenui@gmail.com',
-                          db: Session = Depends(get_db)):
-    contact = db.query(Contact).filter(Contact.email == email).first()
     if contact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not Found')
     return contact
