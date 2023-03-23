@@ -1,24 +1,26 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Security
+from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request
 from fastapi.security import HTTPBearer, OAuth2PasswordRequestForm, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from src.schemas import ContactBase, ContactResponse, TokenModel
+from src.schemas import ContactBase, ContactResponse, TokenModel, EmailSchemas
 from src.contact import contact_func
 from db import get_db, Contact
 from src.services.auth import auth_services
+from src.services.email import send_email_in_backgrounds
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
 
 
 @router.post('/signup', response_model=dict, status_code=status.HTTP_201_CREATED)
-async def signup(body: ContactBase, db: Session = Depends(get_db)):
+async def signup(body: ContactBase, background_tasks: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
     exist_user = await contact_func.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Account already exist')
     body.password = auth_services.get_password_hash(body.password)
     new_user = await contact_func.create_user(body, db)
-    return {'user': new_user, 'detail': 'User successfully created.'}
+    background_tasks.add_task(send_email_in_backgrounds, new_user.email, new_user.name, request.base_url)
+    return {'user': new_user, 'detail': 'User successfully created. Check your email for confirmation.'}
 
 
 @router.post('/login', response_model=TokenModel)
@@ -26,6 +28,8 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     user = await contact_func.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid email')
+    if not user.confirmed_email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Email not confirmed')
     if not auth_services.verify_password(body.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid password')
 
@@ -95,6 +99,28 @@ async def edit_contact(field: str,
     db.commit()
     db.refresh(contact)
     return contact
+
+
+@router.get('/confirmed_email/{token}')
+async def confirmed_email(token: str, db: Session = Depends(get_db)):
+    email = await auth_services.get_email_from_token(token)
+    user = await contact_func.get_user_by_email(email, db)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Verification error')
+    if user.confirmed_email:
+        return {'message': 'Your email is already confirmed'}
+    await contact_func.confirmed_email(email, db)
+    return {'message': 'Email confirmed'}
+
+
+@router.post('/request_email')
+async def request_email(body: EmailSchemas, background_task: BackgroundTasks, request: Request, db: Session = Depends(get_db)):
+    user = await contact_func.get_user_by_email(body.email, db)
+    if user.confirmed_email:
+        return {'message': 'Your email is already confirmed'}
+    if user:
+        background_task.add_task(send_email_in_backgrounds, user.email, user.name, request.base_url)
+    return {'message': 'Check your email for confirmation'}
 
 
 async def authorization(credentials, db: Session = Depends(get_db)):

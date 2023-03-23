@@ -16,3 +16,8 @@ async def create_user(body: ContactBase, db: Session) -> ContactResponse|None:
 async def update_token(user: Contact, token: str|None, db: Session) -> None:
     user.refresh_token = token
     db.commit()
+
+async def confirmed_email(email: str, db: Session):
+    user = await get_user_by_email(email, db)
+    user.confirmed_email = True
+    db.commit()

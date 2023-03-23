@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, String, Integer, Date, Text
+from sqlalchemy import Column, String, Integer, Date, Text, Boolean
 
 from db import engine
 
@@ -17,5 +17,6 @@ class Contact(Base):
     birthday = Column(Date)
     other = Column(Text)
     refresh_token = Column(Text)
+    confirmed_email = Column(Boolean, default=False)
 
 # Base.metadata.create_all(bind=engine)

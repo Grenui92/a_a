@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import date, timedelta
@@ -7,6 +7,10 @@ from datetime import date, timedelta
 from db import get_db, Contact
 from src.schemas import ContactResponse, ContactBase
 from src.routes import contacts
+
+
+
+
 
 app = FastAPI()
 app.include_router(contacts.router)
