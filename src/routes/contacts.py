@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request
+import cloudinary
+import cloudinary.uploader
+from fastapi import APIRouter, HTTPException, Depends, status, Security, BackgroundTasks, Request, UploadFile, File
 from fastapi.security import HTTPBearer, OAuth2PasswordRequestForm, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
@@ -7,6 +9,7 @@ from src.contact import contact_func
 from db import get_db, Contact
 from src.services.auth import auth_services
 from src.services.email import send_email_in_backgrounds
+from src.conf.config import settings
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
@@ -22,6 +25,21 @@ async def signup(body: ContactBase, background_tasks: BackgroundTasks, request: 
     background_tasks.add_task(send_email_in_backgrounds, new_user.email, new_user.name, request.base_url)
     return {'user': new_user, 'detail': 'User successfully created. Check your email for confirmation.'}
 
+
+@router.patch('/avatar', response_model=ContactResponse)
+async def set_avatar(file: UploadFile = File(),
+                     current_user: Contact = Depends(auth_services.get_current_user),
+                     db: Session = Depends(get_db)):
+    cloudinary.config(
+        cloud_name=settings.cloudinary_name,
+        api_key=settings.cloudinary_api_key,
+        api_secret=settings.cloudinary_api_secret,
+        secure=True)
+    cloudinary.uploader.upload(file.file, public_id=f'NotesApp{current_user.name}', overwrite=True)
+    src_url = cloudinary.CloudinaryImage(f'NotesApp/{current_user.name}') \
+        .build_url(width=250, height=250, crop='fill')
+    user = await contact_func.set_avatar(current_user.email, src_url, db)
+    return user
 
 @router.post('/login', response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

@@ -21,3 +21,9 @@ async def confirmed_email(email: str, db: Session):
     user = await get_user_by_email(email, db)
     user.confirmed_email = True
     db.commit()
+
+async def set_avatar(email, url: str, db: Session) -> Contact:
+    user = await get_user_by_email(email, db)
+    user.avatar = url
+    db.commit()
+    return user

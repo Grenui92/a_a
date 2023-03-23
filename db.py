@@ -18,6 +18,7 @@ class Contact(Base):
     birthday = Column(Date)
     other = Column(Text)
     refresh_token = Column(Text)
+    avatar = Column(Text)
 
 # Base.metadata.create_all(bind=engine)
 
