@@ -1,6 +1,6 @@
 from pathlib import Path
-
 from pydantic import EmailStr
+
 from fastapi_mail import ConnectionConfig, MessageSchema, MessageType, FastMail
 from fastapi_mail.errors import ConnectionErrors
 from fastapi import BackgroundTasks
@@ -18,7 +18,7 @@ conf = ConnectionConfig(
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True,
-    TEMPLATE_FOLDER=Path(__file__).parent / 'templates',
+    TEMPLATE_FOLDER=Path(__file__).parent.parent / 'templates',
 )
 
 

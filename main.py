@@ -1,19 +1,38 @@
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import date, timedelta
+
+import redis.asyncio as redis
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 
 from db import get_db, Contact
 from src.schemas import ContactResponse, ContactBase
 from src.routes import contacts
 
-
+origins = [
+    'http://localhost:3000'
+]
 
 
 
 app = FastAPI()
 app.include_router(contacts.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
+@app.on_event('startup')
+async def startup():
+    r = redis.Redis(host='localhost', port=6379, db=0, encoding='utf-8', decode_responses=True)
+    await FastAPILimiter.init(r)
 
 
 @app.get('/', response_model=list[ContactResponse])
@@ -24,7 +43,10 @@ async def get_all_contacts(db: Session = Depends(get_db)):
     return contacts
 
 
-@app.post('/contact', response_model=ContactResponse)
+@app.post('/contact',
+          response_model=ContactResponse,
+          description='Only ten registrations in one hour.',
+          dependencies=[Depends(RateLimiter(times=10, minutes=60))])
 async def create_new_contact(contact_body: ContactBase,
                              db: Session = Depends(get_db)):
     contact = Contact(**contact_body.dict())
