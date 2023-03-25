@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine, Column, String, Date, Text, Integer
 from sqlalchemy.orm import sessionmaker, declarative_base
+from config import settings
 
 
-DB_URL = "postgresql+psycopg2://postgres:92062555Vv@localhost:5432/fast"
+DB_URL = settings.sqlalchemy_database_url
 engine = create_engine(DB_URL)
 session = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
