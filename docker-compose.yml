@@ -1,0 +1,16 @@
+version: "3"
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: fast
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 92062555Vv
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
