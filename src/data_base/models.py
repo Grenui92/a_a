@@ -18,5 +18,6 @@ class Contact(Base):
     other = Column(Text)
     refresh_token = Column(Text)
     confirmed_email = Column(Boolean, default=False)
+    avatar = Column(String(255))
 
 # Base.metadata.create_all(bind=engine)
