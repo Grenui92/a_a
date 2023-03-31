@@ -1,9 +1,12 @@
+import unittest
+from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 
 from src.data_base.models import Contact
 from src.schemas import ContactBase, ContactResponse
 
-async def get_user_by_email(email: str, db: Session) -> Contact|None:
+
+async def get_user_by_email(email: str, db: Session) -> Contact | None:
     """
     The get_user_by_email function takes in an email and a database session,
     and returns the user with that email if it exists. If not, it returns None.
@@ -13,9 +16,12 @@ async def get_user_by_email(email: str, db: Session) -> Contact|None:
     :return: The first user with the given email address
     :doc-author: Trelent
     """
+
+    print('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
     return db.query(Contact).filter(Contact.email == email).first()
 
-async def create_user(body: ContactBase, db: Session) -> ContactResponse|None:
+
+async def create_user(body: ContactBase, db: Session) -> ContactResponse | None:
     """
     The create_user function creates a new user in the database.
 
@@ -30,7 +36,8 @@ async def create_user(body: ContactBase, db: Session) -> ContactResponse|None:
     db.refresh(new_contact)
     return new_contact
 
-async def update_token(user: Contact, token: str|None, db: Session) -> None:
+
+async def update_token(user: Contact, token: str | None, db: Session) -> None:
     """
     The update_token function updates the refresh token for a user in the database.
 
@@ -42,6 +49,7 @@ async def update_token(user: Contact, token: str|None, db: Session) -> None:
     """
     user.refresh_token = token
     db.commit()
+
 
 async def confirmed_email(email: str, db: Session):
     """
@@ -57,6 +65,7 @@ async def confirmed_email(email: str, db: Session):
     user = await get_user_by_email(email, db)
     user.confirmed_email = True
     db.commit()
+
 
 async def set_avatar(email, url: str, db: Session) -> Contact:
     """
