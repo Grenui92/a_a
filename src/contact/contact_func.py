@@ -17,7 +17,6 @@ async def get_user_by_email(email: str, db: Session) -> Contact | None:
     :doc-author: Trelent
     """
 
-    print('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
     return db.query(Contact).filter(Contact.email == email).first()
 
 

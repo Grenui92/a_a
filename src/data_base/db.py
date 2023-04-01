@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, Date, Text, Integer
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from src.conf.config import settings
 
