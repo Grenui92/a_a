@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """
     Gets data from '.env' with pydantic BaseSettings
     """
-    sqlalchemy_database_url: str = 'a'
+    sqlalchemy_database_url: str = 'postgresql+psycopg2://postgres:92062555Vv@localhost:5432/fast'
     secret_key: str = 'secret_key'
     algorithm: str = 'HS256'
     mail_username: str = 'grenui92@meta.ua'
