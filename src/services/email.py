@@ -23,6 +23,21 @@ conf = ConnectionConfig(
 
 
 async def send_email_in_backgrounds(background_task: BackgroundTasks, email: EmailStr, username: str, host: str):
+    """
+    The send_email_in_backgrounds function is used to send an email in the background.
+        Args:
+            background_task (BackgroundTasks): The BackgroundTasks object that will be used to run the task in the
+                background. This object is passed into this function by FastAPI when it calls this function as a callback
+                for a route handler. It's not something you need to worry about, just know that it's there and available
+                for use if you want your code to run in the background instead of blocking other requests from being served.
+
+    :param background_task: BackgroundTasks: Add the task to a background queue
+    :param email: EmailStr: Get the email address of the user
+    :param username: str: Pass the username to the template
+    :param host: str: Pass the host name to the template
+    :return: A coroutine object
+    :doc-author: Trelent
+    """
     try:
         token_verification = auth_services.create_email_token({"sub": email})
         message = MessageSchema(
