@@ -59,7 +59,7 @@ class TestContact(IsolatedAsyncioTestCase):
         initial_token = contact.refresh_token
         new_token = 'asd'
         await update_token(user=contact, token=new_token, db=self.session)
-        self.assertNotEquals(contact.refresh_token, initial_token)
+        self.assertNotEqual(contact.refresh_token, initial_token)
 
     async def test_confirmed_email(self):
         with patch.object(src.contact.contact_func, "get_user_by_email") as get_mock:
